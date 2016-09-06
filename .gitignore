@@ -1,0 +1,12 @@
+*.pyc
+*.swp
+venv
+.seaice
+.seaice_auth
+.seaice_auth.save
+*~
+*.toc
+*.log
+*.aux
+*.out
+_build
