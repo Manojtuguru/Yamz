@@ -660,7 +660,7 @@ class SeaIceConnector:
     :type term_string: str
     :rtype: n, term
     """
-    term_string = term_string.replace("'", "''")
+    #term_string = term_string.replace("'", "''")
     cur = self.con.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
     # xxx should just select 2 columns for now, right?
     cur.execute("""

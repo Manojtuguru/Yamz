@@ -32,6 +32,7 @@ from flask import render_template, render_template_string
 from flask import url_for, redirect, flash
 from flask import request, session, g
 from flask.ext import login as l
+from flask import request
 
 from urllib2 import Request, urlopen, URLError
 import os, sys, optparse, re
@@ -207,48 +208,31 @@ def contact():
 
 # Portal
 #
-#@app.route("/t")
+
 @app.route("/p")
-@app.route("/p/terms = <terms>") # when you want to have variables, Assign it to the variable being called!
-def hash ():
+@app.route("/p/<term>") # when you want to have variables, Assign it to the variable being called!
+def hash (term=None):
   g.db = app.dbPool.getScoped()
-  terms = g.db.hashtag()
-  result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
-  return render_template("browse.html", user_name = l.current_user.name, 
-                                        title = "Browse", 
-                                        headline = "Browse Tags ", 
-                                        content = Markup(result.decode('utf-8')))
-
-'''@app.route("/p")
-@app.route("/p/<terms>") # when you want to have variables, Assign it to the variable being called!
-def hash (terms = ""):
-  g.db = app.dbPool.getScoped()
-  terms = g.db.hashtag()
-  lst = list(terms)
-  #prefix = "#{g: xq"
+  if not term:
+    return render_template("browse.html", user_name = l.current_user.name, 
+                                        title = "No Term", 
+                                        headline = "No Term ", 
+                                        content = Markup("xxx"))
+ 
+  #terms = request.args.get('terms')
+  #terms = 
+  #lst = list(terms)
+  prefix = "#{g: xq"
   #prefix = ""
-  n, tag = g.db.getTermByInitialTermString(prefix + terms)
-  #if n==1:
-  #  result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
-  #else:
-  result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
+  n, tag = g.db.getTermByInitialTermString(prefix+term)
+  if n==1:
+    result = seaice.pretty.printTermsAsLinks(g.db, term)
+  else:
+    result = seaice.pretty.printTermsAsBriefHTML(g.db, term, l.current_user.id)
   return render_template("browse.html", user_name = l.current_user.name, 
                                         title = "Browse", 
                                         headline = "Browse Tags ", 
-                                        content = Markup(result.decode('utf-8')))'''
-
-
-
-  # '''if n == 1:
-   # term_string, concept_id = term['term_string'], term['concept_id']
-    #if reftype == 'g':
-   #   return term_string  # if found, it's already in returnable form
-   #if n == 0:
-  #  term_string, concept_id = (humstring + '(undefined)'), '-'
-  # elif n == 2:
-  #  term_string, concept_id = (humstring + '(ambiguous)'), '-'
-  #print >>sys.stderr, "n=%s, humstring=%s, term_string" % (n, humstring, term_string)
- # return '#{%s: %s | %s}' % (reftype, term_string, concept_id)'''
+                                        content = Markup(term))
 
 
 @app.route("/p/citsci")
