@@ -224,15 +224,54 @@ def hash (term=None):
   #lst = list(terms)
   prefix = "#{g: xq"
   #prefix = ""
+  result = False
   n, tag = g.db.getTermByInitialTermString(prefix+term)
-  if n==1:
-    result = seaice.pretty.printTermsAsLinks(g.db, term)
-  else:
-    result = seaice.pretty.printTermsAsBriefHTML(g.db, term, l.current_user.id)
-  return render_template("browse.html", user_name = l.current_user.name, 
+  if n == 1:
+    x = prefix + term + " "
+    t = tag['term_string']
+    v,s = t.split('|')
+    #a = str(v)
+    #x = prefix+term+" "
+    if x == v:
+      result = seaice.pretty.getPrettyParagraph(g.db, term)
+  if result:
+    return render_template("browse.html", user_name = l.current_user.name, 
                                         title = "Browse", 
-                                        headline = "Browse Tags ", 
-                                        content = Markup(term))
+                                        headline = "Welcome to portal: " + term ,#+ "," + x + "," + v + ",", #+ tag['term_string'] +  "," + term + "," + x, 
+                                        content = Markup(result))
+  
+  return render_template('basic_page.html', user_name = l.current_user.name, 
+                                              title = "Oops! - 404",
+                                              headline = "404",
+                                              content = "The page you requested doesn't exist."), 404
+  #if n == 2:
+   # result = seaice.pretty.getPrettyParagraph(g.db, term)
+    #return render_template("browse.html", user_name = l.current_user.name, 
+                                      #  title = "Browse", 
+                                       # headline = "unambigious", #+ tag['term_string'] +  "," + term + "," + x, 
+                                        #content = Markup(result))  
+  #return render_template("browse.html", user_name = l.current_user.name, 
+   #                                     title = "Browse", 
+    #                                    headline = "Browse Tags", #+ tag['term_string'] +  "," + term + "," + x, 
+     #                                   content = Markup(n))
+  #if not result:
+   # return render_template('basic_page.html', user_name = l.current_user.name, 
+     #                                         title = "Oops! - 404",
+      #                                        headline = "404",
+       #                                       content = "The page you requested doesn't exist."), 404
+  
+  #terms = g.db.search(seaice.pretty.ixuniq.tag)
+  
+  #elif n==2:  
+   # result = seaice.pretty.getPrettyParagraph(g.db, term)
+  #elif n==0:
+    
+  #return render_template("browse.html", user_name = l.current_user.name, 
+                                        #title = "Browse", 
+                                        #headline = "Browse Tags" + tag['term_string'] + "," + term, 
+                                        #content = Markup(result.decode('utf-8')))
+
+
 
 
 @app.route("/p/citsci")
