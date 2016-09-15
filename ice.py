@@ -211,43 +211,43 @@ def contact():
 portal = False
 portalpath = ''
 
-@app.route("/p")
-@app.route("/p/<term>") 
-def hash (term=None):
-  g.db = app.dbPool.getScoped()
-  if not term:
-    return render_template("browse.html", user_name = l.current_user.name, 
-                                        title = "No Term", 
-                                        headline = "No Term ", 
-                                        content = Markup("xxx"))
-  prefix = "#{g: xq"
+#@app.route("/p")
+#@app.route("/p/<term>") 
+#def hash (term=None):
+#  g.db = app.dbPool.getScoped()
+#  if not term:
+#    return render_template("browse.html", user_name = l.current_user.name, 
+#                                       title = "No Term", 
+#                                        headline = "No Term ", 
+#                                        content = Markup("xxx"))
+ # prefix = "#{g: xq"
   #prefix = ""
-  result = False
-  n, tag = g.db.getTermByInitialTermString(prefix+term)
-  if n == 1:
-    x = prefix + term + " "
-    t = tag['term_string']
-    v,s = t.split('|')
+ # result = False
+  #n, tag = g.db.getTermByInitialTermString(prefix+term)
+  #if n == 1:
+   # x = prefix + term + " "
+   # t = tag['term_string']
+   # v,s = t.split('|')
     #a = str(v)
     #x = prefix+term+" "
-    if x == v:
-      result = seaice.pretty.getPrettyParagraph(g.db, term)
-  if result:
-    portal = True
-    portalpath = 'p/' + term
+   # if x == v:
+      #result = seaice.pretty.printTermAsHTML(g.db, term, l.current_user.id)
+ # if result:
+   # portal = True
+   # portalpath = 'p/' + term
     # Here we need to restrict the browse just to portal terms.  Prior art:
     # return browse("stable", prefix+term)
     # 1.  < fill in name of browse routine >
     # 2.  <tag function> 
-    return render_template("browse.html", user_name = l.current_user.name, 
-                                        title =  " Portal " + term, 
-                                        headline = "Welcome to portal: " + term + "," + x + "," + v + ",", #+ tag['term_string'] +  "," + term + "," + x, 
-                                        content = Markup(result))
+    #return render_template("browse.html", user_name = l.current_user.name, 
+          #                              title =  " Portal " + term, 
+         #                               headline = "Welcome to portal: " + term, # "," + x + "," + v + ",", #+ tag['term_string'] +  "," + term + "," + x, 
+        #                                content = Markup(result))
   
-  return render_template('basic_page.html', user_name = l.current_user.name, 
-                                              title = "Oops! - 404",
-                                              headline = "404",
-                                              content = "The page you requested doesn't exist."), 404
+ # return render_template('basic_page.html', user_name = l.current_user.name, 
+           #                                   title = "Oops! - 404",
+            #                                  headline = "404",
+             #                                 content = "The page you requested doesn't exist."), 404
   #if n == 2:
    # result = seaice.pretty.getPrettyParagraph(g.db, term)
     #return render_template("browse.html", user_name = l.current_user.name, 
@@ -273,32 +273,32 @@ def hash (term=None):
   #return render_template("browse.html", user_name = l.current_user.name, 
                                         #title = "Browse", 
                                         #headline = "Browse Tags" + tag['term_string'] + "," + term, 
-                                        #content = Markup(result.decode('utf-8')))
+                                        #content = Markup(result.decode('utf-8'))) */
 
 
 
 
 
 
-@app.route("/p/browse")
-def portalbrowse():
-  return render_template("portalbrowse.html", user_name = l.current_user) 
+#@app.route("/p/browse")
+#def portalbrowse():
+#  return render_template("portalbrowse.html", user_name = l.current_user)
 
-@app.route("/p/contribute")
-def portaladd():
-  return render_template("portalcontribute.html", user_name = l.current_user.name)
+#@app.route("/p/contribute")
+#def portaladd():
+#  return render_template("portalcontribute.html", user_name = l.current_user.name)
 
-@app.route("/p/about")
-def portalabout():
-  return render_template("portalabout.html", user_name = l.current_user.name)
+#@app.route("/p/about")
+#def portalabout():
+#  return render_template("portalabout.html", user_name = l.current_user.name)
 
-@app.route("/p/contact")
-def portalcontact():
-  return render_template("portalcontact.html", user_name = l.current_user.name)
+#@app.route("/p/contact")
+#def portalcontact():
+#  return render_template("portalcontact.html", user_name = l.current_user.name)
 
-@app.route("/p/account")
-def portalaccount():
-  return render_template("portalaccount.html", user_name = l.current_user.name)
+#@app.route("/p/account")
+#def portalaccount():
+#  return render_template("portalaccount.html", user_name = l.current_user.name)
 
 
 
@@ -521,7 +521,8 @@ def getTerm(term_concept_id = None, message = ""):
 
 @app.route("/browse/")
 @app.route("/browse/<listing>")
-#@app.route("/p/<pterm>/browse")
+@app.route("/p/browse")
+@app.route("/p/<pterm>/")
 @app.route("/p/<pterm>/browse/")
 @app.route("/p/<pterm>/browse/<listing>")
 def browse(listing = None, pterm = None):
@@ -549,8 +550,8 @@ def browse(listing = None, pterm = None):
     if n==0:
        return render_template('basic_page.html', user_name = l.current_user.name, 
                                               title = "Oops! - 404",
-                                              headline = "404",
-                                             content = "The page you requested doesn't exist."), 404
+                                              headline = "Portal doesn't exist - 404",
+                                              content = "The portal you requested doesn't exist."), 404
     elif n == 1:
       x = tag['term_string']
       s,r = x.split('|')
@@ -560,20 +561,27 @@ def browse(listing = None, pterm = None):
       c = prefix + pterm + " "
       if c == s:
         pt = g.db.search(seaice.pretty.ixuniq + pterm)
-        #a = str(pt)
+        b = open('content.txt', 'r')
+        f = b.read()#a = str(pt)
         result += seaice.pretty.printTermsAsBriefHTML(g.db, pt , l.current_user.id)
       return render_template("portalbrowse.html", user_name = l.current_user.name, 
-                                        title = "Browse", 
-                                        headline = "Browse dictionary",
-                                        content = Markup(result.decode('utf-8')))
+                                        title = "Browse " + pterm, 
+                                        headline = "Browse Portal " + pterm,
+                                        b = open('content.txt', 'r'),  
+                                        content =  Markup(result.decode('utf-8'))) 
     elif n == 2:
         return render_template('basic_page.html', user_name = l.current_user.name, 
                                               title = "Oops! - 404",
-                                              headline = "404",
-                                             content = "The page you requested doesn't exist."), 404
+                                              headline = "Portal doesn't exist - 404",
+                                             content = "The portal you requested doesn't exist."), 404
+ 
+  
 
-
-  if listing == "recent": # Most recently added listing 
+  if listing == "recent" and pterm == True: # Most recently added listing 
+    result += seaice.pretty.printTermsAsBriefHTML(g.db, 
+      sorted(pt, key=lambda term: term['modified'], reverse=True),
+      l.current_user.id)
+  elif listing == "recent" and pterm != True: # Most recently added listing 
     result += seaice.pretty.printTermsAsBriefHTML(g.db, 
       sorted(terms, key=lambda term: term['modified'], reverse=True),
       l.current_user.id)
