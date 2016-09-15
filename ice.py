@@ -545,26 +545,33 @@ def browse(listing = None, pterm = None):
   
   if pterm:
     prefix = "#{g: xq"   # xxx use global tagstart
-    n,tag = g.db.getTermByInitialTermString(prefix+pterm)
-    x = tag['term_string']
-    s,r = x.split('|')
-    global portal, portalpath
-    portal = True
-    portalpath = 'p/' + pterm
-    c = prefix + pterm + " "
-    if c == s:
-      pt = g.db.search(seaice.pretty.ixuniq + pterm)
-      #a = str(pt)
-      result += seaice.pretty.printTermsAsBriefHTML(g.db, pt , l.current_user.id)
-      return render_template("browse.html", user_name = l.current_user.name, 
+    n,tag = g.db.getTermByInitialTermString(prefix+pterm) 
+    if n==0:
+       return render_template('basic_page.html', user_name = l.current_user.name, 
+                                              title = "Oops! - 404",
+                                              headline = "404",
+                                             content = "The page you requested doesn't exist."), 404
+    elif n == 1:
+      x = tag['term_string']
+      s,r = x.split('|')
+      global portal, portalpath
+      portal = True
+      portalpath = 'p/' + pterm
+      c = prefix + pterm + " "
+      if c == s:
+        pt = g.db.search(seaice.pretty.ixuniq + pterm)
+        #a = str(pt)
+        result += seaice.pretty.printTermsAsBriefHTML(g.db, pt , l.current_user.id)
+      return render_template("portalbrowse.html", user_name = l.current_user.name, 
                                         title = "Browse", 
                                         headline = "Browse dictionary",
                                         content = Markup(result.decode('utf-8')))
-    if c != s:
-      return render_template('basic_page.html', user_name = l.current_user.name, 
+    elif n == 2:
+        return render_template('basic_page.html', user_name = l.current_user.name, 
                                               title = "Oops! - 404",
                                               headline = "404",
-                                              content = "The page you requested doesn't exist."), 404
+                                             content = "The page you requested doesn't exist."), 404
+
 
   if listing == "recent": # Most recently added listing 
     result += seaice.pretty.printTermsAsBriefHTML(g.db, 
