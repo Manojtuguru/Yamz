@@ -210,6 +210,15 @@ def contact():
 #
 portal = False
 portalpath = ''
+portalintro = {
+  'UCOP': '<p> Welcome to the UC Office of the President Portal',
+  'citsci': '''<p> Welcome to the first YAMZ Portal,
+
+#citscitools is a subset of the full YAMZ Metadictionary, an open vocabulary of metadata terms from all domains and from all parts of "metadata speech." The purpose of #citscitools is to help the public produce and vet a specific type of metadata: the words used to describe the different tools and technologies that are commonly used in citizen science.
+
+The metadata included in #citscitools will be used to inform the structure of a new database of citizen science tools created by the online community <a href="http://scistarter.com"> SciStarter. </a> in coordination with the <a href="https://wilsoncommonslab.org/"> Commons Lab</a> at the Woodrow Wilson International Center for Scholars. While people are welcome to contribute to the #citscitools portal at any time, the portal will be debuted in real time at the <a href = "https://sfis.asu.edu/asu-citizen-science-maker-summit-2016"> ASU Citizen Science and Maker Summit </a>, on October 27-28, 2016. </p>     
+     <hr>'''
+}
 
 #@app.route("/p")
 #@app.route("/p/<term>") 
@@ -521,7 +530,7 @@ def getTerm(term_concept_id = None, message = ""):
 
 @app.route("/browse/")
 @app.route("/browse/<listing>")
-@app.route("/p/browse")
+#@app.route("/p/browse")
 @app.route("/p/<pterm>/")
 @app.route("/p/<pterm>/browse/")
 @app.route("/p/<pterm>/browse/<listing>")
@@ -532,56 +541,62 @@ def browse(listing = None, pterm = None):
       #result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
   #   get SOME terms
   #else:
-  terms = g.db.getAllTerms(sortBy="term_string")
+
   letter = '~'
-  result = "<h5>{0} | {1} | {2} | {3} | {4}</h5><hr>".format(
-#     '<a href="' + portalpath + '/browse/score">high score</a>' if listing != "score" else 'high score',
-     '<a href="/browse/score">high score</a>' if listing != "score" else 'high score',
-     '<a href="/browse/recent">recent</a>' if listing != "recent" else 'recent',
-     '<a href="/browse/volatile">volatile</a>' if listing != "volatile" else 'volatile',
-     '<a href="/browse/stable">stable</a>' if listing != "stable" else 'stable',
-     '<a href="/browse/alphabetical">alphabetical</a>' if listing != "alphabetical" else 'alphabetical'
-    )
   # xxx alpha ordering of tags is wrong (because they start '#{g: ')
   
-  if pterm:
+  if pterm:              # make sure pterm is exact match for existing tag
     prefix = "#{g: xq"   # xxx use global tagstart
     n,tag = g.db.getTermByInitialTermString(prefix+pterm) 
-    if n==0:
+    if n != 1:
        return render_template('basic_page.html', user_name = l.current_user.name, 
                                               title = "Oops! - 404",
                                               headline = "Portal doesn't exist - 404",
                                               content = "The portal you requested doesn't exist."), 404
-    elif n == 1:
-      x = tag['term_string']
-      s,r = x.split('|')
-      global portal, portalpath
-      portal = True
-      portalpath = 'p/' + pterm
-      c = prefix + pterm + " "
-      if c == s:
-        pt = g.db.search(seaice.pretty.ixuniq + pterm)
-        b = open('content.txt', 'r')
-        f = b.read()#a = str(pt)
-        result += seaice.pretty.printTermsAsBriefHTML(g.db, pt , l.current_user.id)
-      return render_template("portalbrowse.html", user_name = l.current_user.name, 
-                                        title = "Browse " + pterm, 
-                                        headline = "Browse Portal " + pterm,
-                                        b = open('content.txt', 'r'),  
-                                        content =  Markup(result.decode('utf-8'))) 
-    elif n == 2:
-        return render_template('basic_page.html', user_name = l.current_user.name, 
+    # if we get here, we know n == 1
+    x = tag['term_string']
+    s,r = x.split('|')
+    global portal, portalpath
+    portal = True
+    portalpath = '/p/' + pterm
+    c = prefix + pterm + " "
+    if c == s:
+      terms = g.db.search(seaice.pretty.ixuniq + pterm)
+      #b = open('content.txt', 'r')
+      #f = b.read()#a = str(pt)
+    else:
+      return render_template('basic_page.html', user_name = l.current_user.name, 
                                               title = "Oops! - 404",
-                                              headline = "Portal doesn't exist - 404",
-                                             content = "The portal you requested doesn't exist."), 404
- 
+                                              headline = "Portal ambiguous - 404",
+                                              content = "The portal you requested doesn't exist."), 404
+  else:
+    terms = g.db.getAllTerms(sortBy="term_string")
+    pterm = ''
+  
+  # if we get here, portalpath will be either empty or contain a valid portalpath
+  result = "<h5>{0} | {1} | {2} | {3} | {4}</h5><hr>".format(
+#     '<a href="' + portalpath + '/browse/score">high score</a>' if listing != "score" else 'high score',
+     '<a href="'+portalpath+'/browse/score">high score</a>' if listing != "score" else 'high score',
+     '<a href="'+portalpath+'/browse/recent">recent</a>' if listing != "recent" else 'recent',
+     '<a href="'+portalpath+'/browse/volatile">volatile</a>' if listing != "volatile" else 'volatile',
+     '<a href="'+portalpath+'/browse/stable">stable</a>' if listing != "stable" else 'stable',
+     '<a href="'+portalpath+'/browse/alphabetical">alphabetical</a>' if listing != "alphabetical" else 'alphabetical'
+    )
+
+  # if we get here, terms contains all the terms we're going to print, in either the general or the portal case
+  # result += seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
+  #  return render_template("portalbrowse.html", user_name = l.current_user.name, 
+  #                                      title = "Browse " + pterm, 
+  #                                      headline = "Browse Portal " + pterm,
+  #                                      b = open('content.txt', 'r'),  
+  #                                      content =  Markup(result.decode('utf-8')))
   
 
-  if listing == "recent" and pterm == True: # Most recently added listing 
-    result += seaice.pretty.printTermsAsBriefHTML(g.db, 
-      sorted(pt, key=lambda term: term['modified'], reverse=True),
-      l.current_user.id)
-  elif listing == "recent" and pterm != True: # Most recently added listing 
+  #if listing == "recent" and pterm == True: # Most recently added listing 
+  #  result += seaice.pretty.printTermsAsBriefHTML(g.db, 
+  #    sorted(pt, key=lambda term: term['modified'], reverse=True),
+  #    l.current_user.id)
+  if listing == "recent": # Most recently added listing 
     result += seaice.pretty.printTermsAsBriefHTML(g.db, 
       sorted(terms, key=lambda term: term['modified'], reverse=True),
       l.current_user.id)
@@ -613,11 +628,16 @@ def browse(listing = None, pterm = None):
     result += "</table>"
 
   else:
-    return redirect(  "/browse/recent")
+    return redirect(portalpath + "/browse/recent")
 
+  hdline = "Browse "
+  hdline += pterm if pterm != '' else "dictionary"
+  tle = "Browse " + pterm
+  pintro = portalintro[pterm]
   return render_template("browse.html", user_name = l.current_user.name, 
-                                        title = "Browse", 
-                                        headline = "Browse dictionary",
+                                        title = tle, 
+                                        headline = hdline,
+                                        portalintro = pintro if pintro else '',
                                         content = Markup(result.decode('utf-8')))
 
 
