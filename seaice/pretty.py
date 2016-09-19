@@ -140,11 +140,10 @@ permalink_regex = re.compile("^http://(.*)$")
 # improving search precision when a user clicks on a tag.  The ixuniq
 # string is prepended to a user-defined tag during storage normalization
 # and stripped out during display normalization.
-
+global tagstart
 ixuniq = 'xq'
 ixqlen = len(ixuniq)
 tagstart = '#{g: '		# note: final space is important
-
 def token_ref_norm(m):
   """ Promote "&ref" to "#{t: ref} and promote "#ref" to "#{g: ref}".
 

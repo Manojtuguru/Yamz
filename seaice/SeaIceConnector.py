@@ -491,7 +491,6 @@ class SeaIceConnector:
     else:   return None
 
 
-  # yyy shouldn't getTermConceptId call?
   # NOTE: this getTerm is called with id, the other getTerm with concept_id
   def getTerm(self, id): 
     """ Get term by ID. 
@@ -746,9 +745,14 @@ class SeaIceConnector:
     :type string: str
     :rtype: dict list
     """
+    global portalterm
+
     try:
       string = string.replace("'", "''")
       string = ' & '.join(string.split(' '))
+      #if portalterm != '':
+      #   #string += ' & ' + seaice.pretty.ixuniq + portalterm
+      #   string += ' surf'
       # |'s are also allowed, and paranthesis TODO
       # xxx are we correctly insulating naive queriers?
       cur = self.con.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
