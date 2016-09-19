@@ -209,6 +209,7 @@ def contact():
 # Portal
 #
 portal = False
+portalterm = ''
 portalpath = ''
 portalintro = {
   'UCOP': '<p> Welcome to the UC Office of the President Portal',
@@ -572,6 +573,8 @@ def browse(listing = None, pterm = None):
   else:
     terms = g.db.getAllTerms(sortBy="term_string")
     pterm = ''
+  global portalterm
+  portalterm = pterm
   
   # if we get here, portalpath will be either empty or contain a valid portalpath
   result = "<h5>{0} | {1} | {2} | {3} | {4}</h5><hr>".format(
@@ -633,11 +636,14 @@ def browse(listing = None, pterm = None):
   hdline = "Browse "
   hdline += pterm if pterm != '' else "dictionary"
   tle = "Browse " + pterm
-  pintro = portalintro[pterm]
+  try:
+    pintro = portalintro[pterm]
+  except:
+    pintro = ''
   return render_template("browse.html", user_name = l.current_user.name, 
                                         title = tle, 
                                         headline = hdline,
-                                        portalintro = pintro if pintro else '',
+                                        portalintro = pintro,
                                         content = Markup(result.decode('utf-8')))
 
 
@@ -651,11 +657,26 @@ def returnQuery():
   if request.method == "POST": 
     # XXX whoa -- this use of term_string variable name (in all html forms)
     #     is totally different from term_string as used in the database!
+    #if len(portalterm) != 0:
     search_words = hash2uniquerifier_regex.sub(
         seaice.pretty.ixuniq + '\\1',
         request.form['term_string'])
+    global portal
+    Y = "true" if portal else "false"  
+    #if portal == True:
+      
+    #  terms = g.db.search(portalterm)
+     # result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
+     # return render_template("search.html", user_name = l.current_user.name, 
+     #   term_string = request.form['term_string'],
+	#result = Markup(result.decode('utf-8')))
+    # for normal search route, assume search_words is a simple string
     terms = g.db.search(search_words)
     #terms = g.db.search(request.form['term_string'])
+    X = len(terms)
+    #return render_template("search.html", user_name = l.current_user.name, 
+     #   term_string = request.form['term_string'],
+	#result = Markup("search_words " + search_words + ", " + str(X)))
     if len(terms) == 0: 
       return render_template("search.html", user_name = l.current_user.name, 
         term_string = request.form['term_string'])
@@ -663,7 +684,8 @@ def returnQuery():
       result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
       return render_template("search.html", user_name = l.current_user.name, 
         term_string = request.form['term_string'],
-	result = Markup(result.decode('utf-8')))
+	result = Markup("search_words " + search_words + ", X " + str(X) + Y))
+        #result = Markup(result.decode('utf-8')))
 
   else: # GET
     return render_template("search.html", user_name = l.current_user.name)
