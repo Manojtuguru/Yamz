@@ -548,6 +548,7 @@ def browse(listing = None, pterm = None):
   
   if pterm:              # make sure pterm is exact match for existing tag
     prefix = "#{g: xq"   # xxx use global tagstart
+    global tag
     n,tag = g.db.getTermByInitialTermString(prefix+pterm) 
     if n != 1:
        return render_template('basic_page.html', user_name = l.current_user.name, 
@@ -555,6 +556,7 @@ def browse(listing = None, pterm = None):
                                               headline = "Portal doesn't exist - 404",
                                               content = "The portal you requested doesn't exist."), 404
     # if we get here, we know n == 1
+    
     x = tag['term_string']
     s,r = x.split('|')
     global portal, portalpath
@@ -711,7 +713,7 @@ def getTag(tag = None):
 @app.route("/contribute", methods = ['POST', 'GET'])
 @l.login_required
 def addTerm(): 
-
+  global tag
   if request.method == "POST": 
     g.db = app.dbPool.dequeue()
     term = {
@@ -727,18 +729,23 @@ def addTerm():
     # Special handling is needed for brand new tags, which always return
     # "(undefined/ambiguous)" qualifiers at the moment of definition.
     #
+    G = term['term_string'].startswith('#{g:') 
     if term['term_string'].startswith('#{g:'):		# if defining a tag
       #term['term_string'] = '#{g: %s | %s}' % (		# correct our initial
       term['term_string'] = '%s%s | %s}' % (		# correct our initial
         seaice.pretty.tagstart,
         seaice.pretty.ixuniq + request.form['term_string'][1:],
 	concept_id)					# guesses and update
+      #if portal == True:
+      #  term['definition'] += ' ' + tag['term_string'] 
       g.db.updateTerm(term['id'], term, None, prod_mode)
-
+    elif portal == True and G == False:
+       term['definition'] += '\n' + tag['term_string']
+       g.db.updateTerm(term['id'], term, None, prod_mode) 
     g.db.commit()
     app.dbPool.enqueue(g.db)
     return getTerm(concept_id,
-        message = "Your term has been added to the metadictionary!")
+        message =  "Your term has been added to the metadictionary!")
   
   else:			# GET
     return render_template("contribute.html", user_name = l.current_user.name, 
