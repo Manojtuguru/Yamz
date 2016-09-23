@@ -660,18 +660,24 @@ def returnQuery():
     # XXX whoa -- this use of term_string variable name (in all html forms)
     #     is totally different from term_string as used in the database!
     #if len(portalterm) != 0:
+    termstr = request.form['term_string']
+    global portalterm
+    if portalterm:
+       termstr += ' & #' + portalterm
     search_words = hash2uniquerifier_regex.sub(
         seaice.pretty.ixuniq + '\\1',
-        request.form['term_string'])
-    global portal
+        termstr)
+        #request.form['term_string'])
+
     Y = "true" if portal else "false"  
     #if portal == True:
-      
-    #  terms = g.db.search(portalterm)
-     # result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
-     # return render_template("search.html", user_name = l.current_user.name, 
-     #   term_string = request.form['term_string'],
-	#result = Markup(result.decode('utf-8')))
+    #    search_words += ' & #' + portalterm 
+     #   terms = g.db.search(search_words) 
+      #  terms += g.db.search(request.form['term_string'])
+       # result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
+        #return render_template("search.html", user_name = l.current_user.name, 
+         #    term_string = request.form['term_string'],
+	        #   result = Markup(result.decode('utf-8')))
     # for normal search route, assume search_words is a simple string
     terms = g.db.search(search_words)
     #terms = g.db.search(request.form['term_string'])
@@ -681,13 +687,14 @@ def returnQuery():
 	#result = Markup("search_words " + search_words + ", " + str(X)))
     if len(terms) == 0: 
       return render_template("search.html", user_name = l.current_user.name, 
-        term_string = request.form['term_string'])
+        term_string = request.form['term_string'],
+                   result = Markup("termstr " + termstr + ", X " + str(X) + portalterm))
     else:
       result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
       return render_template("search.html", user_name = l.current_user.name, 
-        term_string = request.form['term_string'],
-	result = Markup("search_words " + search_words + ", X " + str(X) + Y))
-        #result = Markup(result.decode('utf-8')))
+           term_string = request.form['term_string'],
+	         result = Markup("search_words " + search_words + ", X " + str(X) + Y + Markup(result.decode('utf-8'))))
+           #result = Markup(result.decode('utf-8')))
 
   else: # GET
     return render_template("search.html", user_name = l.current_user.name)
