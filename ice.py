@@ -662,15 +662,15 @@ def returnQuery():
     #if len(portalterm) != 0:
     termstr = request.form['term_string']
     global portalterm
-    if portalterm:
-       termstr += ' & #' + portalterm
+    #if portalterm:
+       #termstr += ' & #' + portalterm
     search_words = hash2uniquerifier_regex.sub(
         seaice.pretty.ixuniq + '\\1',
         termstr)
         #request.form['term_string'])
-
+    terms = g.db.search(search_words)
     Y = "true" if portal else "false"  
-    #if portal == True:
+    if portal == True:
     #    search_words += ' & #' + portalterm 
      #   terms = g.db.search(search_words) 
       #  terms += g.db.search(request.form['term_string'])
@@ -679,7 +679,7 @@ def returnQuery():
          #    term_string = request.form['term_string'],
 	        #   result = Markup(result.decode('utf-8')))
     # for normal search route, assume search_words is a simple string
-    terms = g.db.search(search_words)
+      terms = g.db.search(search_words)
     #terms = g.db.search(request.form['term_string'])
     X = len(terms)
     #return render_template("search.html", user_name = l.current_user.name, 
