@@ -33,6 +33,7 @@ from flask import url_for, redirect, flash
 from flask import request, session, g
 from flask.ext import login as l
 from flask import request
+from itertools import izip
 
 from urllib2 import Request, urlopen, URLError
 import os, sys, optparse, re
@@ -647,6 +648,7 @@ def browse(listing = None, pterm = None):
                                         headline = hdline,
                                         portalintro = pintro,
                                         content = Markup(result.decode('utf-8')))
+  #portal = False
 
 
 hash2uniquerifier_regex = re.compile('(?<!#)#(\w[\w.-]+)')
@@ -667,10 +669,13 @@ def returnQuery():
     search_words = hash2uniquerifier_regex.sub(
         seaice.pretty.ixuniq + '\\1',
         termstr)
-        #request.form['term_string'])
-    terms = g.db.search(search_words)
+        
     Y = "true" if portal else "false"  
     if portal == True:
+    	prefix = "#{g: xq"
+    	xterms = g.db.search(search_words)
+    	n,tag = g.db.getTermByInitialTermString(prefix+portalterm)
+        #xterms2 = request.form['persistent_id']
     #    search_words += ' & #' + portalterm 
      #   terms = g.db.search(search_words) 
       #  terms += g.db.search(request.form['term_string'])
@@ -679,21 +684,22 @@ def returnQuery():
          #    term_string = request.form['term_string'],
 	        #   result = Markup(result.decode('utf-8')))
     # for normal search route, assume search_words is a simple string
-      terms = g.db.search(search_words)
+    else:
+    	terms = g.db.search(search_words)  
     #terms = g.db.search(request.form['term_string'])
-    X = len(terms)
+    X = len(xterms)
     #return render_template("search.html", user_name = l.current_user.name, 
-     #   term_string = request.form['term_string'],
+        #term_string = request.form['term_string'],
 	#result = Markup("search_words " + search_words + ", " + str(X)))
-    if len(terms) == 0: 
+    if len(xterms) == 0: 
       return render_template("search.html", user_name = l.current_user.name, 
         term_string = request.form['term_string'],
-                   result = Markup("termstr " + termstr + ", X " + str(X) + portalterm))
+                   result = Markup("termstr " + termstr + ", X " + str(X) + portalterm + portal))
     else:
-      result = seaice.pretty.printTermsAsBriefHTML(g.db, terms, l.current_user.id)
+      result = seaice.pretty.printTermsAsBriefHTML(g.db, xterms, l.current_user.id)
       return render_template("search.html", user_name = l.current_user.name, 
            term_string = request.form['term_string'],
-	         result = Markup("search_words " + search_words + ", X " + str(X) + Y + Markup(result.decode('utf-8'))))
+	         result = Markup("search_words " + search_words + ", X " + str(X) + Y + portalterm +  Markup(result.decode('utf-8'))))
            #result = Markup(result.decode('utf-8')))
 
   else: # GET

@@ -575,6 +575,18 @@ class SeaIceConnector:
     res = cur.fetchone()
     if res: return res[0]
     else:   return None
+  def Portalsearch(self, definition): 
+    """ Get term string by concept ID.
+
+    :param id: Term concept ID.
+    :type id: int
+    :rtype: str or None
+    """
+    cur = self.con.cursor()
+    cur.execute("SELECT term_string, definition, example FROM SI.Terms WHERE like  '%'+ %s + '%'" , (definition,))
+    res = cur.fetchone()
+    if res: return res[0]
+    else:   return None
   
   def getAllTerms(self, sortBy=None): 
     """ Return an iterator over ``SI.Terms``. 
