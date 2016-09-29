@@ -34,6 +34,7 @@ from flask import request, session, g
 from flask.ext import login as l
 from flask import request
 from itertools import izip
+from HTMLParser import HTMLParser
 
 from urllib2 import Request, urlopen, URLError
 import os, sys, optparse, re
@@ -216,9 +217,14 @@ portalintro = {
   'UCOP': '<p> Welcome to the UC Office of the President Portal',
   'citsci': '''<p> Welcome to the first YAMZ Portal,
 
-#citscitools is a subset of the full YAMZ Metadictionary, an open vocabulary of metadata terms from all domains and from all parts of "metadata speech." The purpose of #citscitools is to help the public produce and vet a specific type of metadata: the words used to describe the different tools and technologies that are commonly used in citizen science.
+#citscitools is a subset of the full YAMZ Metadictionary, an open vocabulary of metadata
+ terms from all domains and from all parts of "metadata speech." The purpose of #citscitools is to help 
+ the public produce and vet a specific type of metadata: the words used to describe the different tools and technologies that are commonly used in citizen science.
 
-The metadata included in #citscitools will be used to inform the structure of a new database of citizen science tools created by the online community <a href="http://scistarter.com"> SciStarter. </a> in coordination with the <a href="https://wilsoncommonslab.org/"> Commons Lab</a> at the Woodrow Wilson International Center for Scholars. While people are welcome to contribute to the #citscitools portal at any time, the portal will be debuted in real time at the <a href = "https://sfis.asu.edu/asu-citizen-science-maker-summit-2016"> ASU Citizen Science and Maker Summit </a>, on October 27-28, 2016. </p>     
+The metadata included in #citscitools will be used to inform the structure of a new database of citizen 
+science tools created by the online community <a href="http://scistarter.com"> SciStarter. </a> in coordination 
+with the <a href="https://wilsoncommonslab.org/"> Commons Lab</a> at the Woodrow Wilson International Center for Scholars.
+ While people are welcome to contribute to the #citscitools portal at any time, the portal will be debuted in real time at the <a href = "https://sfis.asu.edu/asu-citizen-science-maker-summit-2016"> ASU Citizen Science and Maker Summit </a>, on October 27-28, 2016. </p>     
      <hr>'''
 }
 
@@ -640,7 +646,7 @@ def browse(listing = None, pterm = None):
   hdline += pterm if pterm != '' else "dictionary"
   tle = "Browse " + pterm
   try:
-    pintro = portalintro[pterm]
+    pintro = Markup(portalintro[pterm])
   except:
     pintro = ''
   return render_template("browse.html", user_name = l.current_user.name, 
@@ -669,7 +675,7 @@ def returnQuery():
     search_words = hash2uniquerifier_regex.sub(
         seaice.pretty.ixuniq + '\\1',
         termstr)
-        
+    xterms = g.db.search(search_words)    
     Y = "true" if portal else "false"  
     if portal == True:
     	prefix = "#{g: xq"
@@ -685,8 +691,26 @@ def returnQuery():
         u = ' '+ 'xq'+portalterm+ ' '
         s = [i for i, x in enumerate(portsearch2) if x == u]
         xtermsf = list(xterms[i] for i in s)
-        	
-        
+    
+        if len(xtermsf) == 0: 
+          return render_template('basic_page.html', user_name = l.current_user.name, 
+                                              title = "Oops! - 404",
+                                              headline = "404 - No term in portal found in " + portalterm + "Search in Yamz dictionary",
+                                              content = " The portal term you requested doesn't exist inside the portal."), 404
+    
+        else:
+            result = seaice.pretty.printTermsAsBriefHTML(g.db, xtermsf, l.current_user.id)
+            return render_template("search.html", user_name = l.current_user.name, 
+            term_string = request.form['term_string'],
+            result = Markup(Markup(result.decode('utf-8'))))
+
+    else:
+      terms = g.db.search(search_words)     	
+      result = seaice.pretty.printTermsAsBriefHTML(g.db, xterms, l.current_user.id)
+      return render_template("search.html", user_name = l.current_user.name, 
+            term_string = request.form['term_string'],
+            result = Markup(Markup(result.decode('utf-8')))) 
+
 
 
     	#search = 'definition' 
@@ -703,22 +727,13 @@ def returnQuery():
          #    term_string = request.form['term_string'],
 	        #   result = Markup(result.decode('utf-8')))
     # for normal search route, assume search_words is a simple string
-    else:
-    	terms = g.db.search(search_words)  
+   
     #terms = g.db.search(request.form['term_string'])
-    X = len(xterms)
     #return render_template("search.html", user_name = l.current_user.name, 
         #term_string = request.form['term_string'],
 	#result = Markup("search_words " + search_words + ", " + str(X)))
-    if len(xterms) == 0: 
-      return render_template("search.html", user_name = l.current_user.name, 
-        term_string = request.form['term_string'],
-                   result = Markup("termstr " + termstr + ", X " + str(portsearch2) + portalterm + portal))
-    else:
-      result = seaice.pretty.printTermsAsBriefHTML(g.db, xtermsf, l.current_user.id)
-      return render_template("search.html", user_name = l.current_user.name, 
-           term_string = request.form['term_string'],
-	         result = Markup("search_words " + search_words + ", X " +str(s) + Y + portalterm +  Markup(result.decode('utf-8'))))
+    
+    
            #result = Markup(result.decode('utf-8')))
 
   else: # GET
@@ -759,7 +774,7 @@ def addTerm():
     (id, concept_id) = g.db.insertTerm(term, prod_mode)
 
     # Special handling is needed for brand new tags, which always return
-    # "(undefined/ambiguous)" qualifiers at the moment of definition.
+    # "(undefined/ambiguous)" qualifiers at the moment of definition.ghtbulb
     #
     G = term['term_string'].startswith('#{g:') 
     if term['term_string'].startswith('#{g:'):		# if defining a tag
