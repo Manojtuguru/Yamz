@@ -557,7 +557,7 @@ def browse(listing = None, pterm = None):
                                               headline = "Portal doesn't exist - 404",
                                               content = "The portal you requested doesn't exist."), 404
     # if we get here, we know n == 1
-    
+    global x
     x = tag['term_string']
     s,r = x.split('|')
     global portal, portalpath
@@ -674,7 +674,26 @@ def returnQuery():
     if portal == True:
     	prefix = "#{g: xq"
     	xterms = g.db.search(search_words)
-    	n,tag = g.db.getTermByInitialTermString(prefix+portalterm)
+    	x=0
+    	xterms3=[None]*len(xterms)
+    	while x<len(xterms):
+    		xterms2=xterms[x]['definition']
+    		xterms3[x]=(xterms2)
+    		x+=1
+        portsearch = [i.split('g:',1)[-1] for i in xterms3]
+        portsearch2 = [i.split('|',1)[0] for i in portsearch]
+        u = ' '+ 'xq'+portalterm+ ' '
+        s = [i for i, x in enumerate(portsearch2) if x == u]
+        xtermsf = list(xterms[i] for i in s)
+        	
+        
+
+
+    	#search = 'definition' 
+    	#for sublist in xterms2:
+    #		if sublist[1] == search:
+    #			return sublist
+    	#n,tag = g.db.getTermByInitialTermString(prefix+portalterm)
         #xterms2 = request.form['persistent_id']
     #    search_words += ' & #' + portalterm 
      #   terms = g.db.search(search_words) 
@@ -694,12 +713,12 @@ def returnQuery():
     if len(xterms) == 0: 
       return render_template("search.html", user_name = l.current_user.name, 
         term_string = request.form['term_string'],
-                   result = Markup("termstr " + termstr + ", X " + str(X) + portalterm + portal))
+                   result = Markup("termstr " + termstr + ", X " + str(portsearch2) + portalterm + portal))
     else:
-      result = seaice.pretty.printTermsAsBriefHTML(g.db, xterms, l.current_user.id)
+      result = seaice.pretty.printTermsAsBriefHTML(g.db, xtermsf, l.current_user.id)
       return render_template("search.html", user_name = l.current_user.name, 
            term_string = request.form['term_string'],
-	         result = Markup("search_words " + search_words + ", X " + str(X) + Y + portalterm +  Markup(result.decode('utf-8'))))
+	         result = Markup("search_words " + search_words + ", X " +str(s) + Y + portalterm +  Markup(result.decode('utf-8'))))
            #result = Markup(result.decode('utf-8')))
 
   else: # GET
