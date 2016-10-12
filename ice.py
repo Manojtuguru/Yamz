@@ -566,10 +566,13 @@ def browse(listing = None, pterm = None):
     global x
     x = tag['term_string']
     s,r = x.split('|')
+    s = s.lower()
+   
     global portal, portalpath
     portal = True
     portalpath = '/p/' + pterm
     c = prefix + pterm + " "
+    c = c.lower()
     if c == s:
       terms = g.db.search(seaice.pretty.ixuniq + pterm)
       #b = open('content.txt', 'r')
@@ -651,7 +654,7 @@ def browse(listing = None, pterm = None):
     pintro = ''
   return render_template("browse.html", user_name = l.current_user.name, 
                                         title = tle, 
-                                        headline = hdline,
+                                        headline = hdline ,
                                         portalintro = pintro,
                                         content = Markup(result.decode('utf-8')))
   #portal = False
