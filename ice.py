@@ -565,16 +565,20 @@ def browse(listing = None, pterm = None):
     # if we get here, we know n == 1
     global x
     x = tag['term_string']
+    global dpterm 
+    #dpterm = tag2simple(x)
     s,r = x.split('|')
-    s = s.lower()
+    u,t = s.split('xq')
+    v = s.lower()
    
     global portal, portalpath
     portal = True
-    portalpath = '/p/' + pterm
+    portalpath = '/p/' + t
     c = prefix + pterm + " "
     c = c.lower()
-    if c == s:
+    if c == v:
       terms = g.db.search(seaice.pretty.ixuniq + pterm)
+
       #b = open('content.txt', 'r')
       #f = b.read()#a = str(pt)
     else:
@@ -646,8 +650,9 @@ def browse(listing = None, pterm = None):
     return redirect(portalpath + "/browse/recent")
 
   hdline = "Browse "
-  hdline += pterm if pterm != '' else "dictionary"
-  tle = "Browse " + pterm
+  hdline += t if pterm != '' else "dictionary"
+  #hdline += dpterm if pterm != '' else "dictionary"
+  tle = "Browse " + t
   try:
     pintro = Markup(portalintro[pterm])
   except:

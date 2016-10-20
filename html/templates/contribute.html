@@ -100,6 +100,24 @@
       <form action="{% if edit_id %}/term={{edit_id}}/edit{% else %}/contribute{% endif %}" method="post">
         <table cellpadding=12 width="70%">
           <tr>
+            <!--input type="radio" name="choice-term" id="choice-term-yes">
+            <label for="choice-term-yes">Are you defining a Term?</label>
+            <input type="radio" name="choice-portal" id="choice-portal-yes">
+            <label for="choice-portal-yes">Are you defining a Portal?</label-->
+            <!--div id = "questions" style="display:none">
+              <td valign=top>Did you check if a portal already exists?</td>
+              <td><textarea
+                  style="width:80%; height:100%"
+              name="definition"></textarea></td>
+            </div>
+            <input type="checkbox" name="Portal"  id ="Portal" value="Portal" onclick="showDiv()"> Defining a Portal<br>
+              <script type="text/javascript">
+                  function showDiv(){
+                    document.getElementById('Portal').style.display = "block";
+                  }
+                </script>
+          </tr-->
+          <tr>
             <td valign=top width="25%">Term string:</td>
             <td width="75%"><input autofocus type="text" name="term_string" value="{% if term_string_edit %}{{term_string_edit}}{% endif %}"></td>
           </tr>
@@ -115,9 +133,52 @@
                  style="width:80%; height:100%"
               type="text" name="examples">{% if examples_edit %}{{ examples_edit }}{% endif %}</textarea></td>
           </tr>
-          <tr><td></td>
+          <tr>
+          <!--input type="checkbox" name="check1" onclick="dynInput(this);" /-->
+          <td valign=top> Defining a tag?: <input type="checkbox"  name = "Defining a tag?" onclick= "dynInput(this);" />
+            <td id ="insertinputs"></td>
+            <input type="file" onchange="previewFile()"><br>
+            <img src="" height="200" alt="Image preview...">
+            <!--button onclick="check()">Yes</button>
+            <button onclick="uncheck()">No</button-->
+            <script>
+              function dynInput(cbox) {
+              if (cbox.checked) {
+               var input = document.createElement("input");
+               input.type = "text";
+               var div = document.createElement("div");
+               div.id = cbox.name;
+               div.innerHTML = "" ;
+               var test = document.createElement("textarea");
+               test.name = "post";
+               test.maxLength = "5000";
+               test.cols = "80";
+               test.rows = "4";
+               test.placeholder = "Introductory Portal text"
+              
+               div.appendChild(test);
+               document.getElementById("insertinputs").appendChild(div);
+               } else {
+               document.getElementById(cbox.name).remove();
+                }
+               var image = document.createElement("img");
+               image.setAttribute('height', '4')
+               image.setAttribute('width', '4')
+               
+              }
+
+              </script>
+
+            </td></tr>
+            <!--td valign=top id = "portal Intro">Enter a portal Introduction:</td>
+            <td><textarea placeholder="Examples of usage or related concepts." rows=4
+                 style="width:80%; height:100%"
+              type="text"> </textarea> </td>
+             <tr--> 
+            
             <td align=right><input type="submit" value="Submit"><td>
           </td>
+          
         </table>
       </form>
 
