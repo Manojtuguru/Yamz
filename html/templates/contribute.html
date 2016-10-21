@@ -135,12 +135,12 @@
           </tr>
           <tr>
           <!--input type="checkbox" name="check1" onclick="dynInput(this);" /-->
-          <td valign=top> Defining a tag?: <input type="checkbox"  name = "Defining a tag?" onclick= "dynInput(this);" />
+          <td valign=top> Defining a tag? <input type="checkbox"  name = "Defining a tag?" onclick= "dynInput(this);" />
+          <tr>
+          <td valign=top> Upload a portal logo? <input type="checkbox"  name = "Upload a portal logo?" onclick= "dynInput2(this);" />
+          
             <td id ="insertinputs"></td>
-            <input type="file" onchange="previewFile()"><br>
-            <img src="" height="200" alt="Image preview...">
-            <!--button onclick="check()">Yes</button>
-            <button onclick="uncheck()">No</button-->
+            <td id ="insertimg"></td>
             <script>
               function dynInput(cbox) {
               if (cbox.checked) {
@@ -161,12 +161,24 @@
                } else {
                document.getElementById(cbox.name).remove();
                 }
-               var image = document.createElement("img");
-               image.setAttribute('height', '4')
-               image.setAttribute('width', '4')
+               }
+               function dynInput2(cbox) {
+                 if(cbox.checked) {
+                  var input = document.createElement("input");
+                  input.type = "file";
+                  var div = document.createElement("div");
+                  div.id = cbox.name;
+                  div.innerHTML = "";
+                  var test2 = document.createElement("input")
+                  test2.name = "portallogo"
+                  test2.setAttribute("type", "file");
+                  div.appendChild(test2);
+                  document.getElementById("insertimg").appendChild(div);
+                } else{
+                  document.getElementById(cbox.name).remove();
+                }
+                                   }
                
-              }
-
               </script>
 
             </td></tr>
